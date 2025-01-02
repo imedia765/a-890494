@@ -30,24 +30,37 @@ const Login = () => {
       // Create the email format we'll use
       const email = `${memberNumber.toLowerCase()}@temp.com`;
       
-      // Try to sign up the user first (this will fail if user already exists, which is fine)
-      await supabase.auth.signUp({
-        email: email,
-        password: memberNumber, // Using member number as initial password
-        options: {
-          data: {
-            member_number: memberNumber,
-          }
-        }
-      });
-
-      // Now try to sign in
+      // Try to sign in first
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email,
         password: memberNumber,
       });
 
-      if (signInError) throw signInError;
+      // If sign in fails because user doesn't exist, try to sign up
+      if (signInError?.message === 'Invalid login credentials') {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: email,
+          password: memberNumber,
+          options: {
+            data: {
+              member_number: memberNumber,
+            }
+          }
+        });
+
+        if (signUpError) throw signUpError;
+
+        // Try signing in again after successful signup
+        const { error: finalSignInError } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: memberNumber,
+        });
+
+        if (finalSignInError) throw finalSignInError;
+      } else if (signInError) {
+        // If it's any other error, throw it
+        throw signInError;
+      }
 
       toast({
         title: "Login successful",
@@ -70,13 +83,11 @@ const Login = () => {
     <div className="min-h-screen bg-dashboard-dark">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Header Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-white mb-4">Pakistan Welfare Association</h1>
             <p className="text-dashboard-text text-lg">Welcome to our community platform. Please login with your member number.</p>
           </div>
 
-          {/* Login Form */}
           <div className="bg-dashboard-card rounded-lg shadow-lg p-8 mb-12">
             <form onSubmit={handleLogin} className="space-y-6 max-w-md mx-auto">
               <div>
@@ -149,7 +160,6 @@ const Login = () => {
             </Button>
           </div>
 
-          {/* Footer */}
           <footer className="text-center text-dashboard-muted text-sm py-8">
             <p>© 2024 SmartFIX Tech, Burton Upon Trent. All rights reserved.</p>
             <p className="mt-2">Website created and coded by Zaheer Asghar</p>
