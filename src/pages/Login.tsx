@@ -7,7 +7,6 @@ import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
   const [memberNumber, setMemberNumber] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -17,18 +16,34 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.rpc(
+      // First, check if the member exists in our database
+      const { data: member, error: memberError } = await supabase.rpc(
         'authenticate_member',
         { p_member_number: memberNumber }
       );
 
-      if (error) throw error;
-      if (!data || data.length === 0) {
+      if (memberError) throw memberError;
+      if (!member || member.length === 0) {
         throw new Error('Member not found');
       }
 
+      // Create the email format we'll use
+      const email = `${memberNumber.toLowerCase()}@temp.com`;
+      
+      // Try to sign up the user first (this will fail if user already exists, which is fine)
+      await supabase.auth.signUp({
+        email: email,
+        password: memberNumber, // Using member number as initial password
+        options: {
+          data: {
+            member_number: memberNumber,
+          }
+        }
+      });
+
+      // Now try to sign in
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: memberNumber + '@temp.com',
+        email: email,
         password: memberNumber,
       });
 
@@ -79,21 +94,6 @@ const Login = () => {
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-dashboard-text mb-2">
-                  Password
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full"
-                  required
-                />
-              </div>
-
               <Button
                 type="submit"
                 className="w-full bg-dashboard-accent1 hover:bg-dashboard-accent1/90"
@@ -104,7 +104,6 @@ const Login = () => {
             </form>
           </div>
 
-          {/* Updates Section */}
           <div className="bg-dashboard-card rounded-lg shadow-lg p-8 mb-12">
             <h2 className="text-2xl font-bold text-white mb-6">What we've been doing</h2>
             <p className="text-dashboard-text mb-6">
@@ -119,7 +118,6 @@ const Login = () => {
             </ul>
           </div>
 
-          {/* Expectations Section */}
           <div className="bg-dashboard-card rounded-lg shadow-lg p-8 mb-12">
             <h2 className="text-2xl font-bold text-white mb-6">What we expect</h2>
             <ul className="list-disc list-inside text-dashboard-text space-y-3">
@@ -132,7 +130,6 @@ const Login = () => {
             </ul>
           </div>
 
-          {/* Important Information */}
           <div className="bg-dashboard-card rounded-lg shadow-lg p-8 mb-12">
             <h2 className="text-2xl font-bold text-white mb-6">Important Information</h2>
             <div className="text-dashboard-text space-y-4">
@@ -142,7 +139,6 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Medical Examiner Process */}
           <div className="bg-dashboard-card rounded-lg shadow-lg p-8 mb-12">
             <h2 className="text-2xl font-bold text-white mb-6">Medical Examiner Process</h2>
             <p className="text-dashboard-text mb-4">
