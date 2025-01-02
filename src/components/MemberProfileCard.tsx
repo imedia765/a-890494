@@ -39,7 +39,9 @@ const MemberProfileCard = ({ memberProfile }: MemberProfileCardProps) => {
             </Avatar>
             <div className="text-center">
               <h3 className="text-xl font-medium text-white mb-1">{memberProfile?.full_name}</h3>
-              <p className="text-dashboard-text text-sm">Member #{memberProfile?.member_number}</p>
+              <p className="bg-dashboard-accent1/10 px-3 py-1 rounded-full text-dashboard-accent1 font-medium">
+                Member #{memberProfile?.member_number}
+              </p>
             </div>
           </div>
           
