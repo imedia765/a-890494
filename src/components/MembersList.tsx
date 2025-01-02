@@ -41,11 +41,11 @@ const MembersList = ({ searchTerm }: { searchTerm: string }) => {
         {members.map((member) => (
           <div 
             key={member.id} 
-            className="bg-dashboard-card p-6 rounded-lg border border-white/10 hover:border-white/20 transition-all duration-300"
+            className="bg-dashboard-card border-white/10 shadow-lg hover:border-dashboard-accent1/50 transition-all duration-300 p-6 rounded-lg border"
           >
             <div className="flex items-start gap-6">
-              <Avatar className="h-16 w-16">
-                <AvatarFallback className="bg-dashboard-accent1 text-lg">
+              <Avatar className="h-16 w-16 border-2 border-dashboard-accent1/20">
+                <AvatarFallback className="bg-dashboard-accent1/20 text-lg text-dashboard-accent1">
                   {member.full_name?.charAt(0) || 'M'}
                 </AvatarFallback>
               </Avatar>
@@ -53,13 +53,16 @@ const MembersList = ({ searchTerm }: { searchTerm: string }) => {
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-medium text-white mb-1">{member.full_name}</h3>
-                    <p className="text-dashboard-text">Member #{member.member_number}</p>
+                    <h3 className="text-xl font-medium text-dashboard-accent2 mb-1">{member.full_name}</h3>
+                    <p className="bg-dashboard-accent1/10 px-3 py-1 rounded-full inline-flex items-center">
+                      <span className="text-dashboard-accent1">Member #</span>
+                      <span className="text-dashboard-accent2 font-medium ml-1">{member.member_number}</span>
+                    </p>
                   </div>
                   <div className={`px-3 py-1 rounded-full text-sm ${
                     member.status === 'active' 
-                      ? 'bg-green-500/20 text-green-500' 
-                      : 'bg-gray-500/20 text-gray-400'
+                      ? 'bg-dashboard-accent3/20 text-dashboard-accent3' 
+                      : 'bg-dashboard-muted/20 text-dashboard-muted'
                   }`}>
                     {member.status || 'Pending'}
                   </div>
@@ -73,11 +76,13 @@ const MembersList = ({ searchTerm }: { searchTerm: string }) => {
                   </div>
                   <div>
                     <p className="text-dashboard-muted mb-1">Address</p>
-                    <p className="text-dashboard-text">
-                      {member.address || 'No address provided'}
-                      {member.town && `, ${member.town}`}
-                      {member.postcode && ` ${member.postcode}`}
-                    </p>
+                    <div className="bg-white/5 p-3 rounded-lg">
+                      <p className="text-dashboard-text">
+                        {member.address || 'No address provided'}
+                        {member.town && `, ${member.town}`}
+                        {member.postcode && ` ${member.postcode}`}
+                      </p>
+                    </div>
                   </div>
                 </div>
                 
