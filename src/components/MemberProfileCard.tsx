@@ -38,7 +38,7 @@ const MemberProfileCard = ({ memberProfile }: MemberProfileCardProps) => {
               </AvatarFallback>
             </Avatar>
             <div className="text-center">
-              <h3 className="text-xl font-medium text-white mb-1">{memberProfile?.full_name}</h3>
+              <h3 className="text-xl font-medium text-dashboard-accent2 mb-1">{memberProfile?.full_name}</h3>
               <p className="bg-dashboard-accent1/10 px-3 py-1 rounded-full">
                 <span className="text-dashboard-accent1">Member #</span>
                 <span className="text-dashboard-accent2 font-medium">{memberProfile?.member_number}</span>
