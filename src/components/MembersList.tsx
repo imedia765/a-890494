@@ -7,17 +7,40 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 type Member = Database['public']['Tables']['members']['Row'];
 
-const MembersList = ({ searchTerm }: { searchTerm: string }) => {
+interface MembersListProps {
+  searchTerm: string;
+  userRole: string | null;
+}
+
+const MembersList = ({ searchTerm, userRole }: MembersListProps) => {
   const { data: members, isLoading, error } = useQuery({
-    queryKey: ['members', searchTerm],
+    queryKey: ['members', searchTerm, userRole],
     queryFn: async () => {
-      console.log('Fetching members...');
+      console.log('Fetching members with role:', userRole);
       let query = supabase
         .from('members')
         .select('*');
       
       if (searchTerm) {
         query = query.or(`full_name.ilike.%${searchTerm}%,member_number.ilike.%${searchTerm}%,collector.ilike.%${searchTerm}%`);
+      }
+
+      // If user is a collector, only show their assigned members
+      if (userRole === 'collector') {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          console.log('Filtering members for collector:', user.id);
+          // First get the collector's name
+          const { data: collectorData } = await supabase
+            .from('members_collectors')
+            .select('name')
+            .single();
+          
+          if (collectorData?.name) {
+            console.log('Filtering by collector name:', collectorData.name);
+            query = query.eq('collector', collectorData.name);
+          }
+        }
       }
       
       const { data, error } = await query
@@ -28,6 +51,7 @@ const MembersList = ({ searchTerm }: { searchTerm: string }) => {
         throw error;
       }
       
+      console.log('Fetched members:', data?.length || 0);
       return data as Member[];
     },
   });
@@ -102,8 +126,8 @@ const MembersList = ({ searchTerm }: { searchTerm: string }) => {
                     <p className="text-dashboard-text">{member.collector || 'Not assigned'}</p>
                   </div>
                   <div>
-                    <p className="text-dashboard-muted mb-1">Registration Status</p>
-                    <p className="text-dashboard-text">{member.registration_status || 'Pending'}</p>
+                    <p className="text-dashboard-muted mb-1">Status</p>
+                    <p className="text-dashboard-text">{member.status || 'Pending'}</p>
                   </div>
                 </div>
               </div>

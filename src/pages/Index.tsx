@@ -5,20 +5,17 @@ import DashboardView from '@/components/DashboardView';
 import MembersList from '@/components/MembersList';
 import CollectorsList from '@/components/CollectorsList';
 import SidePanel from '@/components/SidePanel';
-import TotalCount from '@/components/TotalCount';
-import MemberSearch from '@/components/MemberSearch';
-import { Users } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { Switch } from "@/components/ui/switch";
+import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from '@tanstack/react-query';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
+  const { toast } = useToast();
+  const { userRole, roleLoading, canAccessTab } = useRoleAccess();
+  const queryClient = useQueryClient();
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -28,46 +25,42 @@ const Index = () => {
   };
 
   const handleLogout = async () => {
+    await queryClient.invalidateQueries();
     await supabase.auth.signOut();
     navigate('/login');
   };
 
-  const { data: membersData } = useQuery({
-    queryKey: ['members_count'],
-    queryFn: async () => {
-      const { count } = await supabase
-        .from('members')
-        .select('*', { count: 'exact', head: true });
-      
-      return { totalCount: count || 0 };
-    },
-  });
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!roleLoading && !canAccessTab(activeTab)) {
+      setActiveTab('dashboard');
+      toast({
+        title: "Access Restricted",
+        description: "You don't have permission to access this section.",
+        variant: "destructive",
+      });
+    }
+  }, [activeTab, roleLoading, userRole]);
 
   const renderContent = () => {
+    if (!canAccessTab(activeTab)) {
+      return <DashboardView onLogout={handleLogout} />;
+    }
+
     switch (activeTab) {
       case 'dashboard':
         return <DashboardView onLogout={handleLogout} />;
       case 'users':
         return (
           <>
-            <header className="mb-8 flex justify-between items-center">
-              <div>
-                <h1 className="text-3xl font-medium mb-2 text-white">Members</h1>
-                <p className="text-dashboard-muted">View and manage member information</p>
-              </div>
+            <header className="mb-8">
+              <h1 className="text-3xl font-medium mb-2 text-white">Members</h1>
+              <p className="text-dashboard-muted">View and manage member information</p>
             </header>
-            <TotalCount 
-              items={[{
-                count: membersData?.totalCount || 0,
-                label: "Total Members",
-                icon: <Users className="w-6 h-6 text-dashboard-accent1" />
-              }]}
-            />
-            <MemberSearch 
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-            />
-            <MembersList searchTerm={searchTerm} />
+            <MembersList searchTerm={searchTerm} userRole={userRole} />
           </>
         );
       case 'collectors':
@@ -80,26 +73,6 @@ const Index = () => {
             <CollectorsList />
           </>
         );
-      case 'settings':
-        return (
-          <>
-            <header className="mb-8">
-              <h1 className="text-3xl font-medium mb-2 text-white">Settings</h1>
-              <p className="text-dashboard-muted">Configure your application settings</p>
-            </header>
-            <div className="bg-dashboard-card p-6 rounded-lg border border-white/10">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-white">Dark Mode</p>
-                    <p className="text-sm text-dashboard-muted">Toggle dark mode</p>
-                  </div>
-                  <Switch />
-                </div>
-              </div>
-            </div>
-          </>
-        );
       default:
         return null;
     }
@@ -107,7 +80,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SidePanel onTabChange={setActiveTab} />
+      <div className="w-full bg-dashboard-card/50 py-4 text-center border-b border-white/10">
+        <p className="text-xl text-white font-arabic">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+        <p className="text-sm text-dashboard-text mt-1">In the name of Allah, the Most Gracious, the Most Merciful</p>
+      </div>
+      <SidePanel onTabChange={setActiveTab} userRole={userRole} />
       <div className="pl-64">
         <div className="p-8">
           {renderContent()}
