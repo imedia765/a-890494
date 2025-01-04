@@ -38,28 +38,10 @@ export const useRoleAccess = () => {
           return 'admin' as UserRole;
         }
 
-        // Then check if user is a collector
-        const { data: collectorData, error: collectorError } = await supabase
-          .from('members_collectors')
-          .select('name')
-          .eq('member_profile_id', session.user.id)
-          .eq('active', true)
-          .maybeSingle();
-
-        if (collectorError) {
-          console.error('Collector check error:', collectorError);
-          return null;
-        }
-
-        if (collectorData?.name) {
-          console.log('User is a collector:', collectorData.name);
-          return 'collector' as UserRole;
-        }
-
-        // Finally check if user is a member
+        // Then check if user is a collector by checking members table
         const { data: memberData, error: memberError } = await supabase
           .from('members')
-          .select('id')
+          .select('id, collector_id')
           .eq('auth_user_id', session.user.id)
           .maybeSingle();
 
@@ -68,6 +50,27 @@ export const useRoleAccess = () => {
           return null;
         }
 
+        if (memberData?.collector_id) {
+          // If member has a collector_id, verify they are an active collector
+          const { data: collectorData, error: collectorError } = await supabase
+            .from('members_collectors')
+            .select('name')
+            .eq('id', memberData.collector_id)
+            .eq('active', true)
+            .maybeSingle();
+
+          if (collectorError) {
+            console.error('Collector check error:', collectorError);
+            return null;
+          }
+
+          if (collectorData?.name) {
+            console.log('User is a collector:', collectorData.name);
+            return 'collector' as UserRole;
+          }
+        }
+
+        // Finally check if user is a member
         if (memberData?.id) {
           console.log('User is a member');
           return 'member' as UserRole;
