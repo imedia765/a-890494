@@ -25,7 +25,7 @@ const MembershipDetails = ({ memberProfile, userRole }: MembershipDetailsProps) 
       const { data, error } = await supabase
         .from('members_collectors')
         .select('name')
-        .eq('member_profile_id', memberProfile.id)
+        .eq('id', memberProfile.collector_id)
         .maybeSingle();
 
       if (error) {
