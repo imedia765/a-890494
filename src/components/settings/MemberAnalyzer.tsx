@@ -8,11 +8,16 @@ import { supabase } from "@/integrations/supabase/client";
 import MemberDetails from './analyzer/MemberDetails';
 import UserRoles from './analyzer/UserRoles';
 import CollectorInfo from './analyzer/CollectorInfo';
+import DatabaseConfig from './analyzer/DatabaseConfig';
 
 interface AnalysisResult {
   memberDetails?: any;
   userRoles?: any[];
   collectorStatus?: any;
+  dbConfig?: {
+    tables: any[];
+    policies: any[];
+  };
   errors: string[];
 }
 
@@ -71,10 +76,28 @@ const MemberAnalyzer = () => {
         }
       }
 
+      // 4. Fetch database configuration
+      const { data: tables, error: tablesError } = await supabase
+        .rpc('get_tables_info');
+
+      const { data: policies, error: policiesError } = await supabase
+        .rpc('get_rls_policies');
+
+      if (tablesError) {
+        errors.push(`Tables query error: ${tablesError.message}`);
+      }
+      if (policiesError) {
+        errors.push(`Policies query error: ${policiesError.message}`);
+      }
+
       setResult({
         memberDetails: memberData || null,
         userRoles: rolesData,
         collectorStatus: collectorData,
+        dbConfig: {
+          tables: tables || [],
+          policies: policies || []
+        },
         errors
       });
 
@@ -135,6 +158,10 @@ const MemberAnalyzer = () => {
             <MemberDetails memberDetails={result.memberDetails} />
             <UserRoles roles={result.userRoles || []} />
             <CollectorInfo collectorStatus={result.collectorStatus} />
+            <DatabaseConfig 
+              tables={result.dbConfig?.tables || []} 
+              policies={result.dbConfig?.policies || []} 
+            />
           </ScrollArea>
         )}
       </CardContent>
