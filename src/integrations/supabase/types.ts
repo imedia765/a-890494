@@ -240,6 +240,22 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_rls_policies: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          table_name: string
+          name: string
+          command: string
+        }[]
+      }
+      get_tables_info: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          name: string
+          columns: Json
+          rls_enabled: boolean
+        }[]
+      }
       is_admin: {
         Args: {
           user_uid: string
