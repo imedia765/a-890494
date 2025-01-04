@@ -1,22 +1,16 @@
 import { Member } from "@/types/member";
-import RoleBadge from "./RoleBadge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle2 } from "lucide-react";
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import StatusBadge from "./membership/StatusBadge";
+import MembershipType from "./membership/MembershipType";
 
 interface MembershipDetailsProps {
   memberProfile: Member;
   userRole: string | null;
 }
 
-type AppRole = 'admin' | 'collector' | 'member';
-
 const MembershipDetails = ({ memberProfile, userRole }: MembershipDetailsProps) => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
   // First check if user is a collector
   const { data: collectorStatus } = useQuery({
     queryKey: ['collectorStatus', memberProfile.id],
@@ -113,53 +107,6 @@ const MembershipDetails = ({ memberProfile, userRole }: MembershipDetailsProps) 
   
   const isAdmin = displayRole === 'admin';
 
-  const handleRoleChange = async (newRole: AppRole) => {
-    if (!memberProfile.auth_user_id) {
-      toast({
-        title: "Error",
-        description: "User not found",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // First, delete existing role
-      const { error: deleteError } = await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', memberProfile.auth_user_id);
-
-      if (deleteError) throw deleteError;
-
-      // Then insert new role
-      const { error: insertError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: memberProfile.auth_user_id,
-          role: newRole
-        });
-
-      if (insertError) throw insertError;
-
-      // Invalidate all relevant queries
-      await queryClient.invalidateQueries({ queryKey: ['userRole'] });
-      await queryClient.invalidateQueries({ queryKey: ['collectorStatus'] });
-
-      toast({
-        title: "Success",
-        description: `Role updated to ${newRole}`,
-      });
-    } catch (error) {
-      console.error('Error updating role:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update role",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="space-y-2">
       <p className="text-dashboard-muted text-sm">Membership Details</p>
@@ -167,16 +114,7 @@ const MembershipDetails = ({ memberProfile, userRole }: MembershipDetailsProps) 
         <div className="flex items-center justify-between">
           <div className="text-dashboard-text flex items-center gap-2">
             Status:{' '}
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-              memberProfile?.status === 'active' 
-                ? 'bg-dashboard-accent3/20 text-dashboard-accent3' 
-                : 'bg-dashboard-muted/20 text-dashboard-muted'
-            }`}>
-              {memberProfile?.status || 'Pending'}
-              {memberProfile?.status === 'active' && (
-                <CheckCircle2 className="w-4 h-4 ml-1 text-dashboard-accent3" />
-              )}
-            </span>
+            <StatusBadge status={memberProfile?.status} />
           </div>
           {isAdmin && (
             <span className="bg-dashboard-accent1/20 text-dashboard-accent1 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
@@ -185,43 +123,12 @@ const MembershipDetails = ({ memberProfile, userRole }: MembershipDetailsProps) 
             </span>
           )}
         </div>
-        <div className="text-dashboard-text flex items-center gap-2">
-          <span className="text-dashboard-accent2">Type:</span>
-          <span className="flex items-center gap-2">
-            {memberProfile?.membership_type || 'Standard'}
-            {displayRole === 'admin' ? (
-              <div className="ml-2">
-                <Select onValueChange={handleRoleChange}>
-                  <SelectTrigger className="w-[140px] h-8 bg-dashboard-accent1/10 border-dashboard-accent1/20">
-                    <SelectValue placeholder="Change Role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        Admin
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="collector">
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        Collector
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="member">
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        Member
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <RoleBadge role={displayRole} />
-            )}
-          </span>
-        </div>
+        <MembershipType 
+          membershipType={memberProfile?.membership_type}
+          displayRole={displayRole}
+          isAdmin={isAdmin}
+          authUserId={memberProfile.auth_user_id}
+        />
       </div>
     </div>
   );
