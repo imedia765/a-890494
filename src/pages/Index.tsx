@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import SidePanel from '@/components/SidePanel';
 import DashboardView from '@/components/DashboardView';
@@ -8,7 +9,13 @@ import MemberAnalyzer from '@/components/settings/MemberAnalyzer';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [searchTerm, setSearchTerm] = useState('');
   const { userRole, roleLoading } = useRoleAccess();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate('/login');
+  };
 
   const renderContent = () => {
     if (roleLoading) {
@@ -17,15 +24,15 @@ const Index = () => {
 
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardView />;
+        return <DashboardView onLogout={handleLogout} />;
       case 'users':
-        return <MembersList />;
+        return <MembersList searchTerm={searchTerm} userRole={userRole} />;
       case 'collectors':
         return <CollectorsList />;
       case 'settings':
         return <MemberAnalyzer />;
       default:
-        return <DashboardView />;
+        return <DashboardView onLogout={handleLogout} />;
     }
   };
 
