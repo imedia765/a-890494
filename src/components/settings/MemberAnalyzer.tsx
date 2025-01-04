@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface AnalysisResult {
   memberDetails?: any;
@@ -113,10 +114,10 @@ const MemberAnalyzer = () => {
     if (!result) return null;
 
     return (
-      <ScrollArea className="h-[500px] w-full rounded-md border p-4">
+      <ScrollArea className="h-[500px] w-full rounded-md border">
         {result.errors.length > 0 && (
-          <div className="mb-4">
-            <h3 className="text-red-500 font-semibold mb-2">Errors:</h3>
+          <div className="p-4 mb-4 bg-red-500/10 border border-red-500/20 rounded-md">
+            <h3 className="text-red-500 font-semibold mb-2">Issues Found:</h3>
             <ul className="list-disc pl-4">
               {result.errors.map((error, index) => (
                 <li key={index} className="text-red-400">{error}</li>
@@ -126,38 +127,102 @@ const MemberAnalyzer = () => {
         )}
 
         {result.memberDetails && (
-          <div className="mb-4">
-            <h3 className="text-dashboard-accent1 font-semibold mb-2">Member Details:</h3>
-            <pre className="bg-black/20 p-4 rounded">
-              {JSON.stringify(result.memberDetails, null, 2)}
-            </pre>
+          <div className="p-4">
+            <h3 className="text-dashboard-accent1 font-semibold mb-2">Member Information</h3>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">Full Name</TableCell>
+                  <TableCell>{result.memberDetails.full_name}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Member Number</TableCell>
+                  <TableCell>{result.memberDetails.member_number}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Email</TableCell>
+                  <TableCell>{result.memberDetails.email || 'Not provided'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Phone</TableCell>
+                  <TableCell>{result.memberDetails.phone || 'Not provided'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Status</TableCell>
+                  <TableCell>{result.memberDetails.status || 'Not set'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Membership Type</TableCell>
+                  <TableCell>{result.memberDetails.membership_type || 'Not set'}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         )}
 
         {result.authStatus && (
-          <div className="mb-4">
-            <h3 className="text-dashboard-accent1 font-semibold mb-2">Auth Status:</h3>
-            <pre className="bg-black/20 p-4 rounded">
-              {JSON.stringify(result.authStatus, null, 2)}
-            </pre>
+          <div className="p-4">
+            <h3 className="text-dashboard-accent1 font-semibold mb-2">Authentication Status</h3>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">Email Confirmed</TableCell>
+                  <TableCell>{result.authStatus.email_confirmed_at ? 'Yes' : 'No'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Last Sign In</TableCell>
+                  <TableCell>{result.authStatus.last_sign_in_at || 'Never'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Account Created</TableCell>
+                  <TableCell>{result.authStatus.created_at || 'Unknown'}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         )}
 
-        {result.userRoles && (
-          <div className="mb-4">
-            <h3 className="text-dashboard-accent1 font-semibold mb-2">User Roles:</h3>
-            <pre className="bg-black/20 p-4 rounded">
-              {JSON.stringify(result.userRoles, null, 2)}
-            </pre>
+        {result.userRoles && result.userRoles.length > 0 && (
+          <div className="p-4">
+            <h3 className="text-dashboard-accent1 font-semibold mb-2">User Roles</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Assigned Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {result.userRoles.map((role: any, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{role.role}</TableCell>
+                    <TableCell>{new Date(role.created_at).toLocaleDateString()}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         )}
 
         {result.collectorStatus && (
-          <div className="mb-4">
-            <h3 className="text-dashboard-accent1 font-semibold mb-2">Collector Status:</h3>
-            <pre className="bg-black/20 p-4 rounded">
-              {JSON.stringify(result.collectorStatus, null, 2)}
-            </pre>
+          <div className="p-4">
+            <h3 className="text-dashboard-accent1 font-semibold mb-2">Collector Information</h3>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">Collector Name</TableCell>
+                  <TableCell>{result.collectorStatus.name || 'Not set'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Collector Number</TableCell>
+                  <TableCell>{result.collectorStatus.number || 'Not set'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Status</TableCell>
+                  <TableCell>{result.collectorStatus.active ? 'Active' : 'Inactive'}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         )}
       </ScrollArea>
