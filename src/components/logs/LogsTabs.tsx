@@ -7,15 +7,13 @@ interface LogsTabsProps {
   onTabChange: (tab: LogsTabsType) => void;
 }
 
-const LogsTabs: React.FC<LogsTabsProps> = ({ activeTab, onTabChange }) => {
+export const LogsTabs: React.FC<LogsTabsProps> = ({ activeTab, onTabChange }) => {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange}>
       <TabsList>
-        <TabsTrigger value="audit">Audit Logs</TabsTrigger>
-        <TabsTrigger value="monitoring">Monitoring Logs</TabsTrigger>
+        <TabsTrigger value="AUDIT">Audit Logs</TabsTrigger>
+        <TabsTrigger value="MONITORING">Monitoring Logs</TabsTrigger>
       </TabsList>
     </Tabs>
   );
 };
-
-export default LogsTabs;

@@ -4,7 +4,7 @@ interface DebugConsoleProps {
   logs: string[];
 }
 
-const DebugConsole: React.FC<DebugConsoleProps> = ({ logs }) => {
+export const DebugConsole: React.FC<DebugConsoleProps> = ({ logs }) => {
   return (
     <div className="bg-background border rounded-lg p-4 font-mono text-sm">
       <h2 className="text-lg font-semibold mb-4">Debug Console</h2>
@@ -18,5 +18,3 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ logs }) => {
     </div>
   );
 };
-
-export default DebugConsole;
