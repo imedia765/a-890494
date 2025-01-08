@@ -83,16 +83,16 @@ const MemberCard = ({ member, userRole, onPaymentClick, onEditClick }: MemberCar
           
         {userRole === 'collector' && (
           <div className="mt-4 pt-4 border-t border-white/10">
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-4">
               <Button 
                 onClick={onPaymentClick}
-                className="flex-1 bg-dashboard-accent1 hover:bg-dashboard-accent1/80 text-white transition-colors"
+                className="w-full bg-dashboard-accent1 hover:bg-dashboard-accent1/80 text-white transition-colors"
               >
                 Record Payment
               </Button>
               <Button
                 onClick={onEditClick}
-                className="bg-dashboard-accent2 hover:bg-dashboard-accent2/80 text-white transition-colors"
+                className="w-full bg-dashboard-accent2 hover:bg-dashboard-accent2/80 text-white transition-colors"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
