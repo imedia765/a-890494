@@ -13,7 +13,10 @@ export const useAuthSession = () => {
   const handleAuthError = async (error: AuthError | Error) => {
     console.error('Auth error:', error);
     
-    const errorMessage = error instanceof Error ? error.message : error.error_description;
+    // Get error message based on error type
+    const errorMessage = 'message' in error ? error.message : 
+                        'error_description' in error ? (error as any).error_description :
+                        'An unknown error occurred';
     
     if (errorMessage?.includes('Failed to fetch') || 
         errorMessage?.includes('session_not_found') || 
