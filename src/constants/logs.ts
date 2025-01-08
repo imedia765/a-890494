@@ -1,6 +1,6 @@
-export const LOGS_TABS = {
-  AUDIT: 'audit',
-  MONITORING: 'monitoring'
-} as const;
+export enum LOGS_TABS {
+  AUDIT = 'audit',
+  MONITORING = 'monitoring'
+}
 
-export type LogsTabsType = typeof LOGS_TABS[keyof typeof LOGS_TABS];
+export type LogsTabsType = keyof typeof LOGS_TABS;
