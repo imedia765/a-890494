@@ -13,13 +13,25 @@ import MainLayout from '@/components/layout/MainLayout';
 import { useQueryClient } from '@tanstack/react-query';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const { userRole, roleLoading, canAccessTab } = useRoleAccess();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { userRole, roleLoading, canAccessTab } = useRoleAccess();
   const queryClient = useQueryClient();
+
+  // Set default tab based on user role
+  const [activeTab, setActiveTab] = useState(() => {
+    if (userRole === 'admin') return 'users';
+    return 'dashboard';
+  });
+
+  // Update active tab when user role changes
+  useEffect(() => {
+    if (!roleLoading && userRole === 'admin') {
+      setActiveTab('users');
+    }
+  }, [userRole, roleLoading]);
 
   const handleSessionError = async () => {
     console.log('Session error detected, cleaning up...');
