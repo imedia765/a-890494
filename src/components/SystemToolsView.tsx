@@ -14,12 +14,37 @@ const SystemToolsView = () => {
       </header>
 
       <Tabs defaultValue="health" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="health">System Health</TabsTrigger>
-          <TabsTrigger value="git">Git Operations</TabsTrigger>
-          <TabsTrigger value="roles">Role Management</TabsTrigger>
-          <TabsTrigger value="manual">User Manual</TabsTrigger>
-          <TabsTrigger value="announcements">Announcements</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-5 gap-2 bg-dashboard-card p-1">
+          <TabsTrigger 
+            value="health"
+            className="data-[state=active]:bg-dashboard-accent1 data-[state=active]:text-white"
+          >
+            System Health
+          </TabsTrigger>
+          <TabsTrigger 
+            value="git"
+            className="data-[state=active]:bg-dashboard-accent1 data-[state=active]:text-white"
+          >
+            Git Operations
+          </TabsTrigger>
+          <TabsTrigger 
+            value="roles"
+            className="data-[state=active]:bg-dashboard-accent1 data-[state=active]:text-white"
+          >
+            Role Management
+          </TabsTrigger>
+          <TabsTrigger 
+            value="manual"
+            className="data-[state=active]:bg-dashboard-accent1 data-[state=active]:text-white"
+          >
+            User Manual
+          </TabsTrigger>
+          <TabsTrigger 
+            value="announcements"
+            className="data-[state=active]:bg-dashboard-accent1 data-[state=active]:text-white"
+          >
+            Announcements
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="health" className="space-y-4">
