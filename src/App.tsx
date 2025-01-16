@@ -47,7 +47,8 @@ function AppContent() {
     });
   }
 
-  if (sessionLoading || (session && rolesLoading && location.pathname !== '/login')) {
+  // Only show loading state when checking session on non-login pages
+  if ((sessionLoading || (session && rolesLoading)) && location.pathname !== '/login') {
     return (
       <div className="flex items-center justify-center min-h-screen bg-dashboard-dark">
         <Loader2 className="w-8 h-8 animate-spin text-dashboard-accent1" />
