@@ -12,23 +12,21 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Login page - Current state:', {
+    console.log('Login page state:', {
       hasSession: !!session,
       isLoading: loading,
-      sessionDetails: session ? {
-        user: session.user?.id,
-        expiresAt: session.expires_at
-      } : null
+      timestamp: new Date().toISOString()
     });
 
-    if (session && !loading) {
-      console.log('Login page - Active session detected, redirecting to dashboard');
+    if (session) {
+      console.log('Active session detected on login page, redirecting to dashboard');
       navigate('/', { replace: true });
     }
   }, [session, loading, navigate]);
 
-  // Only show loading state when we're actually checking the session
+  // Only show loading state during the initial session check
   if (loading) {
+    console.log('Login page - Initial session check in progress');
     return (
       <div className="flex items-center justify-center min-h-screen bg-dashboard-dark">
         <Loader2 className="w-8 h-8 animate-spin text-dashboard-accent1" />
@@ -36,8 +34,9 @@ const Login = () => {
     );
   }
 
-  // If we're not loading and there's no session, show the login form
-  if (!loading && !session) {
+  // Show login form if there's no session and we're not loading
+  if (!session) {
+    console.log('Login page - Showing login form (no active session)');
     return (
       <div className="min-h-screen bg-dashboard-dark">
         {/* Header Banner */}
