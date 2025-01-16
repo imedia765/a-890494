@@ -20,6 +20,7 @@ const ProtectedRoutes = ({ session }: ProtectedRoutesProps) => {
   const { syncRoles } = useRoleSync();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     console.log('ProtectedRoutes mounted, session:', !!session);
@@ -42,15 +43,29 @@ const ProtectedRoutes = ({ session }: ProtectedRoutesProps) => {
       }
     });
 
+    // Set initial load to false after a short delay
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false);
+    }, 1000);
+
     return () => {
       subscription.unsubscribe();
+      clearTimeout(timer);
     };
   }, [navigate, hasRole, toast]);
 
-  if (roleLoading) {
+  // Only show loading during initial role check and when roles are actually loading
+  const showLoading = (isInitialLoad && roleLoading) || (!session && roleLoading);
+  
+  if (showLoading) {
+    console.log('Showing loading state:', {
+      isInitialLoad,
+      roleLoading,
+      hasSession: !!session
+    });
     return (
       <div className="flex items-center justify-center min-h-screen bg-dashboard-dark">
-        <Loader2 className="h-8 w-8 animate-spin text-dashboard-accent1" />
+        <Loader2 className="w-8 h-8 animate-spin text-dashboard-accent1" />
       </div>
     );
   }
