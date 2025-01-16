@@ -22,8 +22,9 @@ const ProtectedRoutes = ({ session }: ProtectedRoutesProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
+    console.log('ProtectedRoutes mounted, session:', !!session);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
-      console.log('Auth state change in router:', event);
+      console.log('Auth state change in protected routes:', event);
       
       if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !currentSession)) {
         console.log('User signed out or token refresh failed, redirecting to login');
@@ -55,9 +56,12 @@ const ProtectedRoutes = ({ session }: ProtectedRoutesProps) => {
   }
 
   if (!session) {
+    console.log('No session in ProtectedRoutes, redirecting to login');
     navigate('/login', { replace: true });
     return null;
   }
+
+  console.log('Rendering protected content with role:', userRole);
 
   return (
     <MainLayout

@@ -6,7 +6,7 @@ import { useEnhancedRoleAccess } from "@/hooks/useEnhancedRoleAccess";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Routes, Route } from "react-router-dom";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,8 +32,6 @@ function AppContent() {
   });
 
   useEffect(() => {
-    // Only redirect to login if we're not already on the login page
-    // and we're sure there's no session (not loading)
     if (!sessionLoading && !session && location.pathname !== '/login') {
       console.log('No session detected, redirecting to login');
       navigate('/login', { replace: true });
@@ -49,8 +47,6 @@ function AppContent() {
     });
   }
 
-  // Show loading state only if we're loading session
-  // Don't show loading for roles if we're on the login page
   if (sessionLoading || (session && rolesLoading && location.pathname !== '/login')) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-dashboard-dark">
@@ -61,7 +57,9 @@ function AppContent() {
 
   return (
     <>
-      <ProtectedRoutes session={session} />
+      <Routes>
+        <Route path="/*" element={<ProtectedRoutes session={session} />} />
+      </Routes>
       <Toaster />
     </>
   );
