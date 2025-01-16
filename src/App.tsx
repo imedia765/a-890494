@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
 import { useNavigate, useLocation, Routes, Route } from "react-router-dom";
+import Login from "@/pages/Login";
 
 const queryClient = new QueryClient({
   defaultOptions: {
