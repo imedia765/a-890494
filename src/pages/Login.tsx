@@ -11,18 +11,28 @@ const Login = () => {
   const { session, loading } = useAuthSession();
   const navigate = useNavigate();
 
-  console.log('Login page render state:', { session, loading });
-
   useEffect(() => {
-    // Only redirect if we have a session and we're not loading
+    // Add detailed logging to track session and loading states
+    console.log('Login page - Current state:', {
+      hasSession: !!session,
+      isLoading: loading,
+      sessionDetails: session ? {
+        user: session.user?.id,
+        expiresAt: session.expires_at
+      } : null
+    });
+
     if (session && !loading) {
-      console.log('Login page - redirecting to dashboard due to existing session');
+      console.log('Login page - Active session detected, redirecting to dashboard');
       navigate('/', { replace: true });
+    } else if (!session && !loading) {
+      console.log('Login page - No active session, showing login form');
     }
   }, [session, loading, navigate]);
 
-  // If we're loading, show loading spinner
+  // Show loading state
   if (loading) {
+    console.log('Login page - Loading state active');
     return (
       <div className="flex items-center justify-center min-h-screen bg-dashboard-dark">
         <Loader2 className="w-8 h-8 animate-spin text-dashboard-accent1" />
@@ -30,8 +40,9 @@ const Login = () => {
     );
   }
 
-  // If we're not loading and don't have a session, show login page
+  // Only render login page if there's no session and we're not loading
   if (!loading && !session) {
+    console.log('Login page - Rendering login form');
     return (
       <div className="min-h-screen bg-dashboard-dark">
         {/* Header Banner */}
@@ -75,6 +86,7 @@ const Login = () => {
   }
 
   // This should never happen, but just in case
+  console.log('Login page - Unexpected state:', { session, loading });
   return null;
 };
 
